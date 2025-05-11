@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GPA & CGPA Calculator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .student-info, .semester, .results {
+      margin-bottom: 20px;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .row input {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    label {
+      flex: 1;
+      font-weight: bold;
+    }
+
+    .semester {
+      border-top: 1px solid #ccc;
+      padding-top: 15px;
+    }
+
+    .semester-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .semester-item input {
+      flex: 1;
+      padding: 8px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .results {
+      background-color: #f1f1f1;
+      padding: 15px;
+      border-radius: 6px;
+    }
+
+    #pdfPreview {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="pdfContent">
+  <h2>University GPA & CGPA Calculator</h2>
+
+  <div class="student-info">
+    <div class="row">
+      <input type="text" id="name" placeholder="Student Name">
+      <input type="text" id="id" placeholder="Student ID">
+    </div>
+    <div class="row">
+      <input type="text" id="department" placeholder="Department">
+      <input type="text" id="session" placeholder="Session (e.g. 2021-22)">
+      <input type="text" id="batch" placeholder="Batch">
+    </div>
+  </div>
+
+  <div class="semester" id="semesters">
+    <h3>Semester Details (Fixed 8)</h3>
+    <!-- Generate 8 semesters -->
+    <script>
+      for (let i = 1; i <= 8; i++) {
+        document.write(`
+          <div class="semester-item">
+            <label>Semester ${i}</label>
+            <input type="number" placeholder="Credit Hours" step="0.01" class="ch">
+            <input type="number" placeholder="GPA" step="0.01" class="gpa">
+          </div>
+        `);
+      }
+    </script>
+  </div>
+
+  <button onclick="calculateCGPA()">Calculate CGPA</button>
+  <button onclick="downloadPDF()">Download PDF</button>
+
+  <div class="results" id="results">
+    <strong>Total Credit Hours:</strong> <span id="totalCH">0</span><br>
+    <strong>Total Grade Points:</strong> <span id="totalGP">0</span><br>
+    <strong>CGPA:</strong> <span id="cgpa">0.00</span>
+  </div>
+</div>
+
+<script>
+  function calculateCGPA() {
+    const chInputs = document.querySelectorAll('.ch');
+    const gpaInputs = document.querySelectorAll('.gpa');
+    let totalCH = 0;
+    let totalGP = 0;
+
+    for (let i = 0; i < 8; i++) {
+      const ch = parseFloat(chInputs[i].value);
+      const gpa = parseFloat(gpaInputs[i].value);
+      if (!isNaN(ch) && !isNaN(gpa)) {
+        totalCH += ch;
+        totalGP += ch * gpa;
+      }
+    }
+
+    const cgpa = totalCH ? (totalGP / totalCH).toFixed(2) : 0;
+
+    document.getElementById("totalCH").textContent = totalCH.toFixed(2);
+    document.getElementById("totalGP").textContent = totalGP.toFixed(2);
+    document.getElementById("cgpa").textContent = cgpa;
+  }
+
+  async function downloadPDF() {
+    const content = document.getElementById("pdfContent");
+    const canvas = await html2canvas(content, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const imgProps = pdf.getImageProperties(imgData);
+    const imgWidth = pageWidth;
+    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+    pdf.save("GPA_CGPA_Report.pdf");
+  }
+</script>
+
+</body>
+</html>
