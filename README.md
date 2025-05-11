@@ -20,5 +20,5 @@ A responsive, all-in-one GPA and CGPA calculator for university students. Easily
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/gpa-cgpa-calculator.git
+   [git clone https://github.com/yourusername/gpa-cgpa-calculator.git](https://github.com/P4RTH4-ROY/Univeristy-CGPA-calculation.git)
    cd gpa-cgpa-calculator
